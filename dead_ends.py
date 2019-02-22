@@ -1,9 +1,19 @@
 import csv
+import argparse
 
-# TODO: fix reading input file
+def constructArguments():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-i', '--input', type=str, default=None,
+    help='input path of data file')
+  parser.add_argument('-o', '--output', type=str, default=None,
+    help='output path of data file')
+  args = vars(parser.parse_args())
+
+  return args
+
 
 def write_to_output_file(output):
-  output_file = open('./outputs/deadends_10k.tsv','w+')
+  output_file = open(args['output'], 'w+')
   for val in output:
     output_file.write('{}\n'.format(val))
 
@@ -17,7 +27,9 @@ def generate_edge_list(nodes):
   return edge_u, edge_v
 
 
-def generate_adjacency_list(edge_u, edge_v, adj_list_dict): 
+def generate_adjacency_list(edge_u, edge_v, nodes_list):
+  adj_list_dict = { k: set() for k in nodes_list }
+
   for i in range(len(edge_u)):
     u = edge_u[i]
     v = edge_v[i]
@@ -26,7 +38,7 @@ def generate_adjacency_list(edge_u, edge_v, adj_list_dict):
   return adj_list_dict
 
 
-def generate_reverse_hash_map_and_auto_dead_ends(adj_list_dict):
+def generate_reverse_hash_map_and_auto_dead_ends(adj_list_dict, nodes_list):
   reverse_hash_map = { k: set() for k in nodes_list }
   automatic_dead_ends_1 = set()
   automatic_dead_ends_2 = set()
@@ -61,19 +73,20 @@ def find_parent_dead_ends(reverse_hash_map, automatic_dead_ends_1, automatic_dea
   return automatic_dead_ends_1
 
 
-with open('./web-Google_10k.txt') as inf:
+args = constructArguments()
+
+with open(args['input'], 'r') as inf:
   reader = csv.reader(inf, delimiter='\t')
+  for i in range(4):
+    next(reader, None)
+
   node_list = zip(*list(reader))
   nodes = list(node_list)
 
   edge_u, edge_v = generate_edge_list(nodes)
   nodes_list = list(set(edge_u) | set(edge_v))
 
-  adj_list_dict = { k: set() for k in nodes_list }
-  adj_list_dict = generate_adjacency_list(edge_u, edge_v, adj_list_dict)
-
-  reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2 = generate_reverse_hash_map_and_auto_dead_ends(adj_list_dict)
-
+  adj_list_dict = generate_adjacency_list(edge_u, edge_v, nodes_list)
+  reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2 = generate_reverse_hash_map_and_auto_dead_ends(adj_list_dict, nodes_list)
   all_dead_ends = find_parent_dead_ends(reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2)
-
   write_to_output_file(all_dead_ends)
