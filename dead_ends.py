@@ -45,19 +45,7 @@ def generate_reverse_hash_map_and_auto_dead_ends(adj_list_dict):
   return reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2
 
 
-with open('./web-Google_800k.txt') as inf:
-  reader = csv.reader(inf, delimiter='\t')
-  node_list = zip(*list(reader))
-  nodes = list(node_list)
-
-  edge_u, edge_v = generate_edge_list(nodes)
-  nodes_list = list(set(edge_u) | set(edge_v))
-
-  adj_list_dict = { k: set() for k in nodes_list }
-  adj_list_dict = generate_adjacency_list(edge_u, edge_v, adj_list_dict)
-
-  reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2 = generate_reverse_hash_map_and_auto_dead_ends(adj_list_dict)
-
+def find_parent_dead_ends(reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2):
   while (len(automatic_dead_ends_2) != 0):
     dead_end = automatic_dead_ends_2.pop()
     automatic_dead_ends_2.add(dead_end)
@@ -70,7 +58,22 @@ with open('./web-Google_800k.txt') as inf:
 
     automatic_dead_ends_2.remove(dead_end)
 
-  # print(automatic_dead_ends_2)
-  print(len(automatic_dead_ends_1))
+  return automatic_dead_ends_1
 
-  # write_to_output_file(final_dead_end_list)
+
+with open('./web-Google_10k.txt') as inf:
+  reader = csv.reader(inf, delimiter='\t')
+  node_list = zip(*list(reader))
+  nodes = list(node_list)
+
+  edge_u, edge_v = generate_edge_list(nodes)
+  nodes_list = list(set(edge_u) | set(edge_v))
+
+  adj_list_dict = { k: set() for k in nodes_list }
+  adj_list_dict = generate_adjacency_list(edge_u, edge_v, adj_list_dict)
+
+  reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2 = generate_reverse_hash_map_and_auto_dead_ends(adj_list_dict)
+
+  all_dead_ends = find_parent_dead_ends(reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2)
+
+  write_to_output_file(all_dead_ends)
