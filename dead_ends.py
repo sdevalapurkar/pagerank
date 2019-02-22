@@ -77,6 +77,7 @@ args = constructArguments()
 
 with open(args['input'], 'r') as inf:
   reader = csv.reader(inf, delimiter='\t')
+
   for i in range(4):
     next(reader, None)
 
