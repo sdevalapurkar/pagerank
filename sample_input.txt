@@ -1,3 +1,7 @@
+# Directed graph a toy example for PageRank testing purpose.
+# There is nothing to say here
+# Nodes: 6 Edges: 13
+# FromNodeId	ToNodeId
 0	1
 0	2
 0	3
