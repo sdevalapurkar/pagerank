@@ -1,6 +1,7 @@
 import csv
 import argparse
 import numpy as np
+import copy
 
 def constructArguments():
   parser = argparse.ArgumentParser()
@@ -68,7 +69,24 @@ def find_parent_dead_ends(reverse_hash_map, automatic_dead_ends_1, automatic_dea
   return automatic_dead_ends_1
 
 
-def page_rank_without_dead_ends(adj_list_dict, nodes_set, reverse_hash_map, all_dead_ends):
+def remove_dead_ends(adj_list_dict_without_dead_ends, reverse_hash_map_without_dead_ends, all_dead_ends):
+  removed_dead_ends = []
+
+  while (len(removed_dead_ends) != len(all_dead_ends)):
+    for key, value in list(adj_list_dict_without_dead_ends.items()):
+      if (len(value) == 0):
+        removed_dead_ends.append(key)
+        del adj_list_dict_without_dead_ends[key]
+
+        for val in reverse_hash_map_without_dead_ends[key]:
+          adj_list_dict_without_dead_ends[val].remove(key)
+
+        del reverse_hash_map_without_dead_ends[key]
+
+  return removed_dead_ends, adj_list_dict_without_dead_ends, reverse_hash_map_without_dead_ends
+
+
+def page_rank_without_dead_ends(adj_list_dict_without_dead_ends, nodes_set, reverse_hash_map_without_dead_ends, all_dead_ends):
   non_dead_ends = nodes_set - all_dead_ends
   num_iterations = 10
   beta = 0.85
@@ -76,17 +94,28 @@ def page_rank_without_dead_ends(adj_list_dict, nodes_set, reverse_hash_map, all_
 
   v = np.ones(max(nodes_set) + 1) * (1 / num_vertices)
 
+  print('v')
+  print(v)
+  print('non dead ends')
+  print(non_dead_ends)
+  print('adj no deads')
+  print(adj_list_dict_without_dead_ends)
+  print('rev no deads')
+  print(reverse_hash_map_without_dead_ends)
+
   for _ in range(num_iterations):
+    v0 = v
+
     for i in non_dead_ends:
-      v[i] = beta * sum(map(lambda j: v[j] / len(adj_list_dict[j]), reverse_hash_map[i])) + ((1 - beta) * (1 / num_vertices))
+      v[i] = beta * sum(map(lambda j: v0[j] / len(adj_list_dict_without_dead_ends[j]), reverse_hash_map_without_dead_ends[i])) + ((1 - beta) * (1 / num_vertices))
 
   return v
 
 
-def page_rank_with_dead_ends(page_rank_without_dead_ends, all_dead_ends, adj_list_dict, reverse_hash_map):
+def page_rank_with_dead_ends(removed_dead_ends, page_rank_without_dead_ends, all_dead_ends, adj_list_dict, reverse_hash_map):
   v = page_rank_without_dead_ends
 
-  for i in all_dead_ends:
+  for i in removed_dead_ends[::-1]:
     v[i] = sum(map(lambda j: v[j] / len(adj_list_dict[j]), reverse_hash_map[i]))
 
   return v
@@ -110,7 +139,13 @@ with open(args['input'], 'r') as inf:
   adj_list_dict = generate_adjacency_list(edge_u, edge_v, nodes_list)
   reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2 = generate_reverse_hash_map_and_auto_dead_ends(adj_list_dict, nodes_list)
   all_dead_ends = find_parent_dead_ends(reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2)
-  page_rank_without_dead_ends = page_rank_without_dead_ends(adj_list_dict, nodes_set, reverse_hash_map, all_dead_ends)
-  page_rank_with_dead_ends = page_rank_with_dead_ends(page_rank_without_dead_ends, all_dead_ends, adj_list_dict, reverse_hash_map)
 
+  dup_adj_list_dict = copy.deepcopy(adj_list_dict)
+  dup_reverse_hash_map = copy.deepcopy(reverse_hash_map)
+
+  removed_dead_ends, adj_list_dict_without_dead_ends, reverse_hash_map_without_dead_ends = remove_dead_ends(dup_adj_list_dict, dup_reverse_hash_map, all_dead_ends)
+  page_rank_without_dead_ends = page_rank_without_dead_ends(adj_list_dict_without_dead_ends, nodes_set, reverse_hash_map_without_dead_ends, all_dead_ends)
+  page_rank_with_dead_ends = page_rank_with_dead_ends(removed_dead_ends, page_rank_without_dead_ends, all_dead_ends, adj_list_dict, reverse_hash_map)
+
+  print('final result')
   print(page_rank_with_dead_ends)
