@@ -45,6 +45,6 @@ PageRank is a mathematical algorithm that evaluates the quality and quantity of 
 
 In order to calculate the PageRank of webpages, we represent the pages as nodes of a graph and run the following algorithm on it:
 
-![withdeadends](./img/withdeadends)
+![withdeadends](./img/withdeadends.png)
 
-![withoutdeadends](./img/withoutdeadends)
+![withoutdeadends](./img/withoutdeadends.png)
