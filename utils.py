@@ -62,7 +62,7 @@ def generate_automatic_dead_ends(adj_list_dict):
   return automatic_dead_ends_1, automatic_dead_ends_2
 
 
-def find_parent_dead_ends(reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2):
+def find_parent_dead_ends(adj_list_dict, reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2):
   while (len(automatic_dead_ends_2) != 0):
     dead_end = automatic_dead_ends_2.pop()
     automatic_dead_ends_2.add(dead_end)
