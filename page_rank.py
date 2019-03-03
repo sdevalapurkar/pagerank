@@ -1,7 +1,15 @@
 import csv
 import argparse
 import numpy as np
-from .utils import constructArguments, generate_adjacency_lists, generate_automatic_dead_ends, find_parent_dead_ends
+from utils import constructArguments, generate_adjacency_lists, generate_automatic_dead_ends, find_parent_dead_ends
+
+def write_to_output_file(output):
+  output_file = open(args['output'], 'w+')
+  output_file.write('PageRank\tIds\n')
+
+  for val in output:
+    output_file.write('{}\t{}\n'.format(val[0], val[1]))
+
 
 def remove_dead_ends(adj_list_dict_without_dead_ends, reverse_hash_map_without_dead_ends, all_dead_ends):
   removed_dead_ends = []
@@ -56,11 +64,21 @@ with open(args['input'], 'r') as inf:
     next(reader, None)
 
   int_reader_list = [[int(j) for j in i] for i in list(reader)]
-
   adj_list_dict, dup_adj_list_dict, reverse_hash_map, dup_reverse_hash_map = generate_adjacency_lists(int_reader_list)
   nodes_set = set(adj_list_dict.keys())
+
   automatic_dead_ends_1, automatic_dead_ends_2 = generate_automatic_dead_ends(adj_list_dict)
-  all_dead_ends = find_parent_dead_ends(reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2)
+  all_dead_ends = find_parent_dead_ends(adj_list_dict, reverse_hash_map, automatic_dead_ends_1, automatic_dead_ends_2)
   removed_dead_ends, adj_list_dict_without_dead_ends, reverse_hash_map_without_dead_ends = remove_dead_ends(dup_adj_list_dict, dup_reverse_hash_map, all_dead_ends)  
+
   page_rank_without_dead_ends = page_rank_without_dead_ends(adj_list_dict_without_dead_ends, nodes_set, reverse_hash_map_without_dead_ends, all_dead_ends)
   page_rank_with_dead_ends = page_rank_with_dead_ends(removed_dead_ends, page_rank_without_dead_ends, all_dead_ends, adj_list_dict, reverse_hash_map)
+
+  final_output = []
+
+  for node in nodes_set:
+    final_output.append([page_rank_with_dead_ends[node], node])
+
+  final_output.sort(key=lambda x: x[0], reverse=True)
+
+  write_to_output_file(final_output)
