@@ -48,3 +48,25 @@ In order to calculate the PageRank of webpages, we represent the pages as nodes 
 ![withdeadends](./img/withdeadends.png)
 
 ![withoutdeadends](./img/withoutdeadends.png)
+
+## Running the Program
+
+To run the code given an input file of the format:
+
+| fromNode   |      toNode      |
+|----------|:-------------:|
+| 0 |  1 |
+| 0 |    2   |
+| 1 | 2 |
+
+We can run:
+
+```
+python3 page_rank.py <options>
+```
+
+where the options are:
+
+```
+-i <input file path> -o <output file path>
+```
