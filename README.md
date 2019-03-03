@@ -34,3 +34,13 @@ where the options are:
 ```
 -i <input file path> -o <output file path>
 ```
+
+## Calculating PageRank
+
+PageRank is a mathematical algorithm that evaluates the quality and quantity of links to a webpage. This evaluation helps it to determine a relative score of the page's importance and authority.
+
+In order to calculate the PageRank of webpages, we represent the pages as nodes of a graph and run the following algorithm on it:
+
+![withdeadends]()
+
+![withoutdeadends]()
